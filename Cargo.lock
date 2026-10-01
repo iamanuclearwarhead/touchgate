@@ -415,6 +415,12 @@ dependencies = [
 [[package]]
 name = "touchgate-agents"
 version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "thiserror",
+ "touchgate-core",
+]
 
 [[package]]
 name = "touchgate-auth"
