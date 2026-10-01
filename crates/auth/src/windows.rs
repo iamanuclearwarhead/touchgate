@@ -49,13 +49,13 @@ fn bring_dialog_forward() {
         for _ in 0..20 {
             std::thread::sleep(Duration::from_millis(150));
             unsafe {
-                if let Ok(h) = FindWindowW(w!("Credential Dialog Xaml Host"), None) {
-                    if !h.is_invalid() {
-                        keybd_event(VK_MENU.0 as u8, 0, KEYBD_EVENT_FLAGS(0), 0);
-                        let _ = SetForegroundWindow(h);
-                        keybd_event(VK_MENU.0 as u8, 0, KEYEVENTF_KEYUP, 0);
-                        return;
-                    }
+                if let Ok(h) = FindWindowW(w!("Credential Dialog Xaml Host"), None)
+                    && !h.is_invalid()
+                {
+                    keybd_event(VK_MENU.0 as u8, 0, KEYBD_EVENT_FLAGS(0), 0);
+                    let _ = SetForegroundWindow(h);
+                    keybd_event(VK_MENU.0 as u8, 0, KEYEVENTF_KEYUP, 0);
+                    return;
                 }
             }
         }

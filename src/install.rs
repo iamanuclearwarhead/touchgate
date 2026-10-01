@@ -339,19 +339,16 @@ pub fn agent_has_hook(locs: &Locations, agent: Agent) -> bool {
 mod tests {
     use super::*;
 
-    fn tmp() -> std::path::PathBuf {
-        let d = std::env::temp_dir().join(format!("touchgate-test-{}-{}", std::process::id(), rand_suffix()));
+    fn tmp(name: &str) -> std::path::PathBuf {
+        let d = std::env::temp_dir().join(format!("touchgate-test-{}-{name}", std::process::id()));
+        let _ = fs::remove_dir_all(&d);
         fs::create_dir_all(&d).unwrap();
         d
     }
 
-    fn rand_suffix() -> u128 {
-        std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()
-    }
-
     #[test]
     fn install_merges_and_uninstall_cleans_up() {
-        let root = tmp();
+        let root = tmp("merge");
         let locs = Locations::under(&root);
         fs::create_dir_all(locs.claude.parent().unwrap()).unwrap();
         fs::write(
@@ -406,7 +403,7 @@ mod tests {
 
     #[test]
     fn refuses_to_clobber_broken_json() {
-        let root = tmp();
+        let root = tmp("broken");
         let locs = Locations::under(&root);
         fs::create_dir_all(locs.claude.parent().unwrap()).unwrap();
         fs::write(&locs.claude, "{ nope").unwrap();
