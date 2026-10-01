@@ -1,0 +1,45 @@
+[workspace]
+members = ["crates/core", "crates/agents", "crates/auth"]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/iamanuclearwarhead/touchgate"
+rust-version = "1.88"
+
+[workspace.dependencies]
+touchgate-core = { path = "crates/core" }
+touchgate-agents = { path = "crates/agents" }
+touchgate-auth = { path = "crates/auth" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "1"
+regex = "1"
+globset = "0.4"
+thiserror = "2"
+
+[package]
+name = "touchgate"
+description = "fingerprint approval for risky ai agent actions"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+touchgate-core.workspace = true
+touchgate-agents.workspace = true
+touchgate-auth.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+toml.workspace = true
+clap = { version = "4", features = ["derive"] }
+anyhow = "1"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true

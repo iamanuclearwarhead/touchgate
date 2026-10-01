@@ -1,0 +1,258 @@
+[[rule]]
+name = "touchgate-self"
+description = "changes touchgate or managed agent config"
+tool = ["write"]
+path = [
+  "/etc/touchgate/**", "/usr/bin/touchgate", "/usr/local/bin/touchgate",
+  "/etc/claude-code/**", "/etc/codex/**", "/etc/gemini-cli/**",
+  "/Library/Application Support/touchgate/**", "/Library/Application Support/ClaudeCode/**",
+  "/Library/Application Support/GeminiCli/**",
+  "C:/ProgramData/touchgate/**", "C:/Program Files/touchgate/**", "C:/Program Files/ClaudeCode/**",
+  "C:/ProgramData/OpenAI/Codex/**", "C:/ProgramData/gemini-cli/**",
+]
+action = "deny"
+
+[[rule]]
+name = "env-examples"
+tool = ["shell", "read", "write"]
+path = ["**/.env.example", "**/.env.sample", "**/.env.template", "**/.env.dist"]
+action = "allow"
+
+[[rule]]
+name = "secrets"
+description = "touches secrets"
+tool = ["shell", "read", "write"]
+path = [
+  "~/.ssh/**", "~/.gnupg/**", "~/.aws/**", "~/.azure/**", "~/.config/gcloud/**", "~/.kube/config",
+  "~/.docker/config.json", "~/.netrc", "~/.pgpass", "~/.npmrc", "~/.pypirc", "~/.git-credentials",
+  "~/.cargo/credentials", "~/.cargo/credentials.toml", "~/.config/gh/hosts.yml",
+  "~/.password-store/**", "~/.local/share/keyrings/**", "~/.config/rclone/rclone.conf",
+  "~/.mozilla/**", "~/.config/google-chrome/**", "~/.config/chromium/**",
+  "~/.config/BraveSoftware/**", "~/.config/vivaldi/**", "~/.zen/**", "~/.librewolf/**",
+  "~/Library/Keychains/**", "~/Library/Application Support/Google/Chrome/**",
+  "~/Library/Application Support/Firefox/**", "~/Library/Cookies/**",
+  "~/AppData/Roaming/Mozilla/**", "~/AppData/Local/Google/Chrome/**",
+  "~/AppData/Local/Microsoft/Edge/**",
+  "**/.env", "**/.env.*", "**/*.pem", "**/*.key", "**/*.p12", "**/*.pfx", "**/*.keystore",
+  "**/id_rsa", "**/id_ed25519", "**/id_ecdsa", "**/credentials.json", "**/service-account*.json",
+  "**/.terraform/**/*.tfstate", "**/*.tfstate", "**/secrets.yaml", "**/secrets.yml",
+  "/etc/shadow", "/etc/gshadow", "/etc/sudoers", "/etc/sudoers.d/**",
+]
+action = "touch"
+
+[[rule]]
+name = "persistence"
+description = "writes a startup or shell profile file"
+tool = ["write"]
+path = [
+  "~/.bashrc", "~/.bash_profile", "~/.profile", "~/.zshrc", "~/.zprofile", "~/.zshenv",
+  "~/.config/fish/**", "~/.config/autostart/**", "~/.config/systemd/user/**",
+  "~/.config/environment.d/**", "~/.local/bin/**", "~/Library/LaunchAgents/**",
+  "/Library/LaunchAgents/**", "/Library/LaunchDaemons/**", "/etc/systemd/**", "/etc/cron*/**",
+  "/etc/profile.d/**", "**/.git/hooks/**", "**/.husky/**",
+  "~/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/**",
+  "~/Documents/PowerShell/**", "~/Documents/WindowsPowerShell/**",
+]
+action = "touch"
+
+[[rule]]
+name = "agent-config"
+description = "edits agent settings or hooks"
+tool = ["write"]
+path = [
+  "~/.claude/settings.json", "~/.claude/settings.local.json", "**/.claude/settings.json",
+  "**/.claude/settings.local.json", "~/.codex/**", "**/.codex/**", "~/.gemini/settings.json",
+  "**/.gemini/settings.json", "~/.config/touchgate/**", "**/.cursor/hooks.json",
+  "~/.copilot/**", "**/.github/hooks/**",
+]
+action = "touch"
+
+[[rule]]
+name = "write-devices"
+description = "writes to a device or system path"
+tool = ["write"]
+path = ["/dev/sd*", "/dev/nvme*", "/dev/mmcblk*", "/dev/disk*", "/boot/**", "/etc/**", "/usr/**", "/bin/**", "/sbin/**", "/lib/**", "/System/**", "C:/Windows/**"]
+action = "touch"
+
+[[rule]]
+name = "shell-tricks"
+description = "runs code the gate cannot see"
+tool = ["shell"]
+flag = ["obfuscated", "dynamic-command", "shell-from-stdin", "inline-code-exec", "unparsed"]
+action = "touch"
+
+[[rule]]
+name = "delete"
+description = "deletes files"
+tool = ["shell"]
+command = [
+  '^rm\s(.*\s)?(-[a-zA-Z]*[rRf][a-zA-Z]*|--recursive|--force)(\s|$)',
+  '^(shred|srm|wipe|wipefs)\b',
+  '^find\s.*\s-delete\b',
+  '^(rmdir|del|rd|erase)\s(.*\s)?/s\b',
+  '^Remove-Item\b.*-Recurse',
+  '^trash-empty\b',
+]
+action = "touch"
+
+[[rule]]
+name = "disk"
+description = "rewrites a disk"
+tool = ["shell"]
+command = [
+  '^(mkfs(\.\w+)?|fdisk|sfdisk|gdisk|sgdisk|parted|cfdisk|cryptsetup|diskutil|format|diskpart)\b',
+  '^dd\s(.*\s)?of=',
+  '^(mount|umount|swapoff|losetup)\b',
+]
+action = "touch"
+
+[[rule]]
+name = "privilege"
+description = "runs with elevated privileges"
+tool = ["shell"]
+command = ['^(sudo|doas|run0|pkexec|su|runas|gsudo)(\s|$)', '^Start-Process\b.*-Verb\s+RunAs']
+action = "touch"
+
+[[rule]]
+name = "git-destructive"
+description = "rewrites or discards git history"
+tool = ["shell"]
+command = [
+  '^git\s(.*\s)?push\s(.*\s)?(-f|--force|--force-with-lease(=\S*)?|--force-if-includes|--mirror|--delete|-d|--prune)(\s|$)',
+  '^git\s(.*\s)?push\s(.*\s)?\+\S+',
+  '^git\s(.*\s)?push\s(.*\s)?\S+\s+:\S+',
+  '^git\s(.*\s)?reset\s(.*\s)?--(hard|merge|keep)\b',
+  '^git\s(.*\s)?clean\s(.*\s)?-[a-zA-Z]*f',
+  '^git\s(.*\s)?branch\s(.*\s)?(-D|--delete\s+--force|-d\s+-f)\b',
+  '^git\s(.*\s)?(filter-branch|filter-repo|replace)\b',
+  '^git\s(.*\s)?stash\s+(drop|clear)\b',
+  '^git\s(.*\s)?checkout\s(.*\s)?(--\s+\.|-f|--force)(\s|$)',
+  '^git\s(.*\s)?restore\s(.*\s)?(\.|--staged\s+--worktree|-SW)(\s|$)',
+  '^git\s(.*\s)?update-ref\s+-d\b',
+  '^git\s(.*\s)?reflog\s+(expire|delete)\b',
+  '^git\s(.*\s)?gc\s(.*\s)?--prune=now\b',
+]
+action = "touch"
+
+[[rule]]
+name = "permissions"
+description = "changes permissions recursively"
+tool = ["shell"]
+command = ['^(chmod|chown|chgrp|chattr|setfacl)\s(.*\s)?(-[a-zA-Z]*R|--recursive)\b', '^(chmod)\s(.*\s)?(777|a\+w|o\+w)\s+/', '^(icacls|takeown)\b']
+action = "touch"
+
+[[rule]]
+name = "system"
+description = "changes system state"
+tool = ["shell"]
+command = [
+  '^(shutdown|reboot|poweroff|halt|init|telinit)(\s|$)',
+  '^(systemctl|loginctl)\s(.*\s)?(poweroff|reboot|halt|kexec|suspend|hibernate|disable|mask|isolate)\b',
+  '^crontab\s(.*\s)?-r\b',
+  '^(iptables|ip6tables|nft|ufw|firewall-cmd|pfctl|netsh)\b',
+  '^(useradd|userdel|usermod|passwd|chpasswd|visudo|dscl)\b',
+  '^(kill|pkill|killall)\s(.*\s)?(-9\s+-1|-KILL\s+-1|1)$',
+  '^(launchctl)\s(.*\s)?(unload|bootout|remove|disable)\b',
+  '^(Stop-Computer|Restart-Computer|Set-ExecutionPolicy|Remove-LocalUser)\b',
+  '^(reg)\s+(delete|add)\b',
+  '^csrutil\b',
+]
+action = "touch"
+
+[[rule]]
+name = "packages"
+description = "installs, removes or publishes packages"
+tool = ["shell"]
+command = [
+  '^(pacman|yay|paru)\s(.*\s)?-(R|Rs|Rns|Rdd|Syu|Su|S)\b',
+  '^(apt|apt-get|dnf|yum|zypper|apk)\s(.*\s)?(install|remove|purge|autoremove|upgrade|dist-upgrade|del)\b',
+  '^(brew)\s+(uninstall|remove|rm|untap)\b',
+  '^(snap|flatpak)\s+(remove|uninstall)\b',
+  '^(winget|choco|scoop)\s+(uninstall|remove)\b',
+  '^(npm|pnpm|yarn|bun)\s(.*\s)?(publish|unpublish|deprecate|owner|dist-tag)\b',
+  '^cargo\s(.*\s)?(publish|yank|owner)\b',
+  '^(twine|flit|hatch|poetry|uv)\s(.*\s)?(upload|publish)\b',
+  '^gem\s+(push|yank|owner)\b',
+  '^(docker|podman)\s(.*\s)?push\b',
+  '^(makepkg|aurpublish)\s(.*\s)?(--install|-i)\b',
+]
+action = "touch"
+
+[[rule]]
+name = "containers"
+description = "destroys containers or volumes"
+tool = ["shell"]
+command = [
+  '^(docker|podman)\s(.*\s)?(rm|rmi|kill)\b',
+  '^(docker|podman)\s(.*\s)?(system|volume|image|container|network|builder)\s+(prune|rm)\b',
+  '^(docker|podman)[- ]compose\s(.*\s)?down\s(.*\s)?(-v|--volumes|--rmi)\b',
+]
+action = "touch"
+
+[[rule]]
+name = "infra"
+description = "changes live infrastructure"
+tool = ["shell"]
+command = [
+  '^(kubectl|oc|helm)\s(.*\s)?(delete|drain|cordon|apply|replace|patch|scale|rollout|uninstall|upgrade|install|edit)\b',
+  '^(terraform|tofu|terragrunt|pulumi|cdk|serverless|sls)\s(.*\s)?(apply|destroy|import|deploy|up|refresh|taint|state\s+(rm|mv|push))\b',
+  '^(aws|gcloud|gsutil|az|doctl|flyctl|fly|vercel|netlify|heroku|railway|wrangler|firebase|supabase|linode-cli|hcloud|oci|ibmcloud|ansible-playbook)\b',
+]
+action = "touch"
+
+[[rule]]
+name = "github"
+description = "changes something on github"
+tool = ["shell"]
+command = [
+  '^gh\s(.*\s)?repo\s+(delete|archive|rename|edit|transfer)\b',
+  '^gh\s(.*\s)?(release|secret|variable|ssh-key|gpg-key)\s+(create|delete|set|remove|upload|edit)\b',
+  '^gh\s(.*\s)?pr\s+merge\b',
+  '^gh\s(.*\s)?api\s(.*\s)?(-X|--method)\s*(DELETE|PUT|PATCH)\b',
+  '^gh\s(.*\s)?auth\s+(token|refresh|logout)\b',
+]
+action = "touch"
+
+[[rule]]
+name = "databases"
+description = "drops or truncates database data"
+tool = ["shell"]
+command = [
+  '(?i)\b(drop\s+(table|database|schema|collection|index)|truncate\s+(table\s+)?\w|delete\s+from\s+\w+\s*(;|$))',
+  '(?i)\b(flushall|flushdb|dropDatabase)\b',
+  '^(dropdb|dropuser)\b',
+  '^(prisma)\s(.*\s)?(migrate\s+reset|db\s+push\s.*--force-reset)\b',
+  '^(rails|rake)\s(.*\s)?db:(drop|reset|schema:load)\b',
+  '^(php\s+artisan|artisan)\s(.*\s)?(migrate:fresh|migrate:reset|db:wipe)\b',
+]
+action = "touch"
+
+[[rule]]
+name = "exfil"
+description = "sends data to a remote host"
+tool = ["shell"]
+command = [
+  '^(curl|wget|http|xh)\s(.*\s)?(-T|--upload-file|-d\s*@|--data(-binary|-raw|-urlencode)?\s*@|-F\s*\S+=@|--post-file)',
+  '^(nc|ncat|netcat|socat|telnet)\s',
+  '^(scp|rsync|sftp)\s(.*\s)?\S+:\S*$',
+  '169\.254\.169\.254',
+]
+action = "touch"
+
+[[rule]]
+name = "mcp-destructive"
+description = "mcp tool that deletes, publishes or sends"
+tool = ["mcp"]
+tool_name = [
+  "mcp__*__*delete*", "mcp__*__*remove*", "mcp__*__*drop*", "mcp__*__*destroy*", "mcp__*__*purge*",
+  "mcp__*__*merge*", "mcp__*__*publish*", "mcp__*__*deploy*", "mcp__*__*send*", "mcp__*__*transfer*",
+  "mcp__*__*pay*", "mcp__*__*execute*", "mcp__*__*run_sql*", "mcp__*__*trash*", "mcp__*__*share*",
+]
+action = "touch"
+
+[[rule]]
+name = "metadata-endpoint"
+description = "fetches cloud instance metadata"
+tool = ["fetch"]
+url = ['^https?://(169\.254\.169\.254|metadata\.google\.internal|100\.100\.100\.200)']
+action = "touch"
