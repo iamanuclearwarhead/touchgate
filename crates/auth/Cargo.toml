@@ -11,3 +11,21 @@ thiserror.workspace = true
 [target.'cfg(target_os = "linux")'.dependencies]
 zbus = { version = "5", default-features = false, features = ["blocking-api", "async-io"] }
 notify-rust = { version = "4", default-features = false, features = ["z"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "0.6"
+objc2-foundation = { version = "0.3", default-features = false, features = ["std", "NSString", "NSError"] }
+objc2-local-authentication = { version = "0.3", default-features = false, features = ["std", "LAContext", "LABiometryType", "LAError", "LAPublicDefines", "block2"] }
+block2 = "0.6"
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.62", features = [
+  "Security_Credentials_UI",
+  "Foundation",
+  "Win32_Foundation",
+  "Win32_System_WinRT",
+  "Win32_System_Console",
+  "Win32_UI_WindowsAndMessaging",
+  "Win32_UI_Input_KeyboardAndMouse",
+] }
+windows-future = "0.3"
