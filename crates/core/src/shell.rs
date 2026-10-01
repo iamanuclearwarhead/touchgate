@@ -271,11 +271,10 @@ impl Walker<'_, '_> {
                 }
             }
             "cp" | "mv" | "install" | "ln" | "rsync" | "scp" => {
-                if let Some(last) = known.iter().filter(|a| !a.starts_with('-')).nth_back(0) {
-                    if known.iter().filter(|a| !a.starts_with('-')).count() >= 2 {
+                if let Some(last) = known.iter().filter(|a| !a.starts_with('-')).nth_back(0)
+                    && known.iter().filter(|a| !a.starts_with('-')).count() >= 2 {
                         self.out.write_targets.push(last.clone());
                     }
-                }
             }
             "dd" => {
                 for a in &known {
@@ -313,11 +312,10 @@ impl Walker<'_, '_> {
                 .cloned()
                 .collect();
             if base == "flock" {
-                if let Some((_, r)) = rest.split_first() {
-                    if let Some((n, r2)) = r.split_first() {
+                if let Some((_, r)) = rest.split_first()
+                    && let Some((n, r2)) = r.split_first() {
                         self.expand(n.as_str(), r2, depth);
                     }
-                }
                 return;
             }
             if let Some((n, r)) = rest.split_first() {
@@ -350,11 +348,10 @@ impl Walker<'_, '_> {
             }
             "timeout" => {
                 let rest = skip_opts(args, &["-s", "-k", "--signal", "--kill-after"]);
-                if let Some((_, r)) = rest.split_first() {
-                    if let Some((n, r2)) = r.split_first() {
+                if let Some((_, r)) = rest.split_first()
+                    && let Some((n, r2)) = r.split_first() {
                         self.expand(n.as_str(), r2, depth);
                     }
-                }
             }
             "xargs" => {
                 let rest = skip_opts(args, &["-I", "-i", "-n", "-L", "-l", "-P", "-d", "-E", "-e", "-s", "-a"]);

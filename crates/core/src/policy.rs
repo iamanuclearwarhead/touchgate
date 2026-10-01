@@ -9,6 +9,8 @@ use crate::action::{Action, Decision, ToolKind, Verdict};
 use crate::paths::{candidates, expand_home, slashes};
 use crate::shell::analyze;
 
+pub const MAX_TIMEOUT_SECS: u64 = 80;
+
 pub const DEFAULT_POLICY: &str = include_str!("../policy/default.toml");
 
 #[derive(Debug, thiserror::Error)]
@@ -105,7 +107,7 @@ impl Policy {
             Some((origin, text)) => (parse(origin, text)?, origin.to_string()),
             None => (RawPolicy::default(), "builtin".to_string()),
         };
-        let timeout_secs = sys_raw.timeout.unwrap_or(45).clamp(5, 600);
+        let timeout_secs = sys_raw.timeout.unwrap_or(45).clamp(5, MAX_TIMEOUT_SECS);
         let mut rules = compile_rules(&sys_origin, sys_raw.rules, home)?;
         if sys_raw.builtin.unwrap_or(true) {
             let builtin = parse("builtin", DEFAULT_POLICY)?;
@@ -240,11 +242,10 @@ impl Policy {
 
 impl Rule {
     fn matches(&self, u: &Unit) -> bool {
-        if let Some(k) = &self.kinds {
-            if !k.contains(&u.kind) {
+        if let Some(k) = &self.kinds
+            && !k.contains(&u.kind) {
                 return false;
             }
-        }
         let has_matchers = !self.command.is_empty()
             || self.path.is_some()
             || !self.url.is_empty()
@@ -256,26 +257,22 @@ impl Rule {
         if let Some(f) = &u.flag {
             return self.flag.iter().any(|x| x == f);
         }
-        if let Some(c) = &u.command {
-            if self.command.iter().any(|r| r.is_match(c)) {
+        if let Some(c) = &u.command
+            && self.command.iter().any(|r| r.is_match(c)) {
                 return true;
             }
-        }
-        if let Some(g) = &self.path {
-            if u.paths.iter().any(|p| g.is_match(p)) {
+        if let Some(g) = &self.path
+            && u.paths.iter().any(|p| g.is_match(p)) {
                 return true;
             }
-        }
-        if let Some(url) = &u.url {
-            if self.url.iter().any(|r| r.is_match(url)) {
+        if let Some(url) = &u.url
+            && self.url.iter().any(|r| r.is_match(url)) {
                 return true;
             }
-        }
-        if let Some(g) = &self.tool_name {
-            if g.is_match(&u.tool_name) {
+        if let Some(g) = &self.tool_name
+            && g.is_match(&u.tool_name) {
                 return true;
             }
-        }
         false
     }
 }

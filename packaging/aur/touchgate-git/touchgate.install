@@ -1,0 +1,11 @@
+post_install() {
+    echo "run 'sudo touchgate install' to gate your agents, then 'touchgate doctor'"
+}
+
+post_upgrade() {
+    echo "run 'touchgate doctor' to check everything still lines up"
+}
+
+pre_remove() {
+    echo "run 'sudo touchgate uninstall' first if you have not, or your agents will try to call a missing binary"
+}

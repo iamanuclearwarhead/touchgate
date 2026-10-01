@@ -140,11 +140,10 @@ fn wait(dev: &DeviceProxyBlocking<'static>, timeout: Duration) -> Result<AuthRes
     let (tx, rx) = mpsc::channel();
     std::thread::spawn(move || {
         for s in signals {
-            if let Ok(args) = s.args() {
-                if tx.send((args.result().to_string(), *args.done())).is_err() {
+            if let Ok(args) = s.args()
+                && tx.send((args.result().to_string(), *args.done())).is_err() {
                     break;
                 }
-            }
         }
     });
 

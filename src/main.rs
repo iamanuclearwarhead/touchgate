@@ -119,6 +119,10 @@ pub fn load_policy() -> Result<Policy> {
 }
 
 fn hook(agent: Agent) -> ExitCode {
+    std::panic::set_hook(Box::new(|info| {
+        eprintln!("touchgate: internal error, blocking to be safe: {info}");
+        std::process::exit(2);
+    }));
     let mut input = String::new();
     let resp = match std::io::stdin().take(16 << 20).read_to_string(&mut input) {
         Err(e) => fail_closed(&format!("could not read hook input: {e}")),

@@ -183,3 +183,13 @@ fn bad_policy_is_an_error() {
     assert!(Policy::load(Some(("x", "[[rule]]\nname='a'\ncommand=['(']\naction='touch'")), None, home).is_err());
     assert!(Policy::load(Some(("x", "[[rule]]\nname='a'\ntool=['bogus']\naction='touch'")), None, home).is_err());
 }
+
+#[test]
+fn readme_example_policy_loads() {
+    let readme = include_str!("../../../README.md");
+    let block = readme.split("```toml\n").nth(1).unwrap().split("```").next().unwrap();
+    let p = Policy::load(Some(("readme", block)), None, Path::new(HOME)).unwrap();
+    assert_eq!(p.timeout_secs, 45);
+    check(&p, &shell("rm -rf node_modules"), Verdict::Allow);
+    check(&p, &shell("kubectl get pods --context prod"), Verdict::Deny);
+}

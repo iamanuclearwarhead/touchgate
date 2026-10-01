@@ -51,7 +51,7 @@ impl FromStr for Agent {
 
 #[derive(Debug, thiserror::Error)]
 pub enum ParseError {
-    #[error("hook input is not valid json: {0}")]
+    #[error("hook input is not valid json")]
     Json(#[from] serde_json::Error),
     #[error("hook input has no tool_name")]
     NoTool,

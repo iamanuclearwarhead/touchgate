@@ -112,14 +112,13 @@ pub fn run() -> Result<()> {
         r.line(Level::Fail, "gemini", "GEMINI_CLI_SYSTEM_SETTINGS_PATH is set, gemini ignores the managed hook");
     }
     let gs = home().join(".gemini/settings.json");
-    if let Ok(t) = std::fs::read_to_string(&gs) {
-        if let Ok(v) = serde_json::from_str::<serde_json::Value>(&t) {
+    if let Ok(t) = std::fs::read_to_string(&gs)
+        && let Ok(v) = serde_json::from_str::<serde_json::Value>(&t) {
             let disabled = v["hooksConfig"]["disabled"].as_array().is_some_and(|a| a.iter().any(|x| x.as_str().is_some_and(|s| s.contains("touchgate"))));
             if disabled {
                 r.line(Level::Fail, "gemini", format!("{} disables the touchgate hook", gs.display()));
             }
         }
-    }
 
     #[cfg(unix)]
     {

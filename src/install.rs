@@ -299,8 +299,8 @@ pub fn codex_add(doc: &mut DocumentMut, cmd: &str, bin: &Path, lock: bool) {
 
 pub fn codex_remove(doc: &mut DocumentMut, lock: bool) -> bool {
     let mut changed = false;
-    if let Some(hooks) = doc.get_mut("hooks").and_then(Item::as_table_mut) {
-        if let Some(pre) = hooks.get_mut("PreToolUse").and_then(Item::as_array_of_tables_mut) {
+    if let Some(hooks) = doc.get_mut("hooks").and_then(Item::as_table_mut)
+        && let Some(pre) = hooks.get_mut("PreToolUse").and_then(Item::as_array_of_tables_mut) {
             let before = pre.len();
             pre.retain(|t| !toml_is_ours(t));
             changed = pre.len() != before;
@@ -308,7 +308,6 @@ pub fn codex_remove(doc: &mut DocumentMut, lock: bool) -> bool {
                 hooks.remove("PreToolUse");
             }
         }
-    }
     if lock {
         doc.remove("allow_managed_hooks_only");
     }
