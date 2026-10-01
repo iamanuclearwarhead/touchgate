@@ -122,10 +122,12 @@ for real isolation run agents in a container or vm, and use touchgate on top
 ## status
 
 - linux with fprintd: tested on a real reader
+- claude code: tested live, touch lets it through, no touch blocks it
+- gemini cli: tested live, hook fires and blocks, approve path next
+- codex: hook format from its docs and binary, live test next
 - macos touch id and windows hello: build, not tested on hardware yet
-- claude code, codex, gemini cli: hook formats from each agent's docs and source, live tests are next
 
-if you try it anywhere, tell me how it went
+if you try it anywhere, tell me how it went in [#1](../../issues/1)
 
 ## notes
 
