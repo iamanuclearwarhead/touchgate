@@ -34,12 +34,16 @@ touchgate-core.workspace = true
 touchgate-agents.workspace = true
 touchgate-auth.workspace = true
 serde.workspace = true
-serde_json.workspace = true
+serde_json = { workspace = true, features = ["preserve_order"] }
 toml.workspace = true
 clap = { version = "4", features = ["derive"] }
 anyhow = "1"
+toml_edit = "0.25"
 
 [profile.release]
 lto = true
 codegen-units = 1
 strip = true
+
+[target."cfg(unix)".dependencies]
+libc = "0.2.189"

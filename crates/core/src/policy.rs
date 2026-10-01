@@ -31,6 +31,7 @@ pub enum PolicyError {
 struct RawPolicy {
     builtin: Option<bool>,
     default: Option<Verdict>,
+    timeout: Option<u64>,
     #[serde(default, rename = "rule")]
     rules: Vec<RawRule>,
 }
@@ -78,6 +79,7 @@ pub struct Layer {
 #[derive(Debug)]
 pub struct Policy {
     pub layers: Vec<Layer>,
+    pub timeout_secs: u64,
     home: PathBuf,
 }
 
@@ -103,6 +105,7 @@ impl Policy {
             Some((origin, text)) => (parse(origin, text)?, origin.to_string()),
             None => (RawPolicy::default(), "builtin".to_string()),
         };
+        let timeout_secs = sys_raw.timeout.unwrap_or(45).clamp(5, 600);
         let mut rules = compile_rules(&sys_origin, sys_raw.rules, home)?;
         if sys_raw.builtin.unwrap_or(true) {
             let builtin = parse("builtin", DEFAULT_POLICY)?;
@@ -124,6 +127,7 @@ impl Policy {
         }
         Ok(Self {
             layers,
+            timeout_secs,
             home: home.to_path_buf(),
         })
     }
